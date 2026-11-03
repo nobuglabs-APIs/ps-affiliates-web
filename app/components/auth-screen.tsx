@@ -66,7 +66,7 @@ export function AuthScreen({
     : mode === 'register'
       ? 'Comece hoje a construir uma nova fonte de rendimento.'
       : mode === 'verify'
-        ? 'Use o link recebido por e-mail ou introduza o código de verificação.'
+        ? 'Abra o link recebido por e-mail para confirmar a conta. Se não chegar, pode pedir outro.'
         : 'Aceda ao seu painel de afiliado e acompanhe o seu progresso.';
 
   return (
@@ -124,12 +124,8 @@ export function AuthScreen({
                     <input id="full-name" required autoComplete="name" value={name} onChange={(event) => setName(event.target.value)} placeholder="O seu nome" />
                   </>
                 )}
-                {mode !== 'verify' && (
-                  <>
-                    <label htmlFor="email">E-mail</label>
-                    <input id="email" required type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="nome@exemplo.com" />
-                  </>
-                )}
+                <label htmlFor="email">E-mail</label>
+                <input id="email" required type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="nome@exemplo.com" />
                 {mode !== 'verify' && (
                   <>
                     <label htmlFor="password">Palavra-passe</label>
@@ -147,8 +143,11 @@ export function AuthScreen({
                 )}
                 {mode === 'verify' && (
                   <>
-                    <label htmlFor="verification-token">Código de verificação</label>
-                    <input id="verification-token" required value={token} onChange={(event) => setToken(event.target.value)} placeholder="Cole o código recebido por e-mail" />
+                    <label htmlFor="verification-token">Token de verificação</label>
+                    <input id="verification-token" required value={token} onChange={(event) => setToken(event.target.value)} placeholder="Cole o token do link recebido por e-mail" />
+                    <button type="button" className="text-button" disabled={busy || !email.trim()} onClick={() => onResendVerification(email)}>
+                      Reenviar e-mail de verificação
+                    </button>
                   </>
                 )}
                 <button className="button button-primary button-wide" disabled={busy}>
