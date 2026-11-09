@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/r/:path*",
+      "destination": "http://102.37.1.46:8082/r/:path*"
+    },
+    {
       "source": "/api/v1/:path*",
       "destination": "http://102.37.1.46:8082/api/v1/:path*"
     },
