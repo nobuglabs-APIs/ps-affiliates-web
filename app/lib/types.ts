@@ -79,3 +79,14 @@ export type TwoFactorStatus = {
   required: boolean;
   required_at: string;
 };
+
+export type AppNotification = {
+  id: string;
+  affiliate_id: string;
+  kind: string;
+  title: string;
+  body: string;
+  data: unknown;
+  read_at: string | null;
+  created_at: string;
+};

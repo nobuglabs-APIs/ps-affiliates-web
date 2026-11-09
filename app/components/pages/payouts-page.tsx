@@ -4,6 +4,7 @@ import { FormEvent, useState } from 'react';
 import type { AffiliateOverview, Payout } from '../../lib/types';
 import { formatDate, formatMoney, formatStatus } from '../../lib/format';
 import { PayoutMethod } from '../payout-method';
+import { Icon } from '../icons';
 
 type PayoutsPageProps = {
   overview: AffiliateOverview;
@@ -46,7 +47,7 @@ export function PayoutsPage({ overview, payouts, busy, onRequestPayout }: Payout
       <div className="payout-layout">
         <article className="form-card">
           <div className="form-card-heading">
-            <span className="form-card-icon">↗</span>
+            <span className="form-card-icon"><Icon name="wallet" size={18} /></span>
             <div>
               <h2>Pedir levantamento</h2>
               <p>Indique o valor e os dados de destino.</p>
@@ -114,9 +115,9 @@ export function PayoutsPage({ overview, payouts, busy, onRequestPayout }: Payout
         </article>
 
         <aside className="payout-note">
-          <span className="note-icon">i</span>
+          <span className="note-icon"><Icon name="info" size={14} /></span>
           <h3>Antes de solicitar</h3>
-          <p>Os pedidos são analisados pela equipa PS-Mobile. As comissões ficam sujeitas a um período de retenção de {overview.hold_days} dias.</p>
+          <p>Os pedidos são analisados pela equipa Nobug Rewards. As comissões ficam sujeitas a um período de retenção de {overview.hold_days} dias.</p>
           <div className="note-separator" />
           <div className="note-row"><span>Valor mínimo</span><strong>{formatMoney(overview.minimum_withdrawal_cents, overview.currency)}</strong></div>
           <div className="note-row"><span>Pedidos recentes</span><strong>{payouts.length}</strong></div>
@@ -150,7 +151,7 @@ export function PayoutsPage({ overview, payouts, busy, onRequestPayout }: Payout
           </div>
         ) : (
           <div className="empty-state">
-            <span className="empty-icon">◇</span>
+            <span className="empty-icon"><Icon name="wallet" size={19} /></span>
             <strong>Sem pedidos de levantamento</strong>
             <p>Os seus pedidos vão aparecer aqui.</p>
           </div>

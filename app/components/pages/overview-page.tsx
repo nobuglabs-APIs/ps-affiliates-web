@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import type { AffiliateOverview } from '../../lib/types';
 import { formatMoney } from '../../lib/format';
+import { Icon, type IconName } from '../icons';
 
 export function OverviewPage({ overview }: { overview: AffiliateOverview }) {
   const [copied, setCopied] = useState(false);
@@ -13,11 +14,11 @@ export function OverviewPage({ overview }: { overview: AffiliateOverview }) {
     window.setTimeout(() => setCopied(false), 2000);
   };
 
-  const metrics = [
-    { label: 'Saldo disponível', value: formatMoney(overview.balance_cents, overview.currency), icon: '↗', tone: 'mint' },
-    { label: 'Comissões em retenção', value: formatMoney(overview.pending_cents, overview.currency), icon: '◷', tone: 'sand' },
-    { label: 'Total recebido', value: formatMoney(overview.paid_out_cents, overview.currency), icon: '✓', tone: 'blue' },
-    { label: 'Indicações activas', value: String(overview.active_referrals_count), icon: '♧', tone: 'violet' },
+  const metrics: Array<{ label: string; value: string; icon: IconName; tone: string }> = [
+    { label: 'Saldo disponível', value: formatMoney(overview.balance_cents, overview.currency), icon: 'wallet', tone: 'rose' },
+    { label: 'Comissões em retenção', value: formatMoney(overview.pending_cents, overview.currency), icon: 'clock', tone: 'amber' },
+    { label: 'Total recebido', value: formatMoney(overview.paid_out_cents, overview.currency), icon: 'check', tone: 'graphite' },
+    { label: 'Indicações activas', value: String(overview.active_referrals_count), icon: 'users', tone: 'plum' },
   ];
   const activeReferralPercent = overview.referrals_count
     ? Math.min(100, overview.active_referrals_count / overview.referrals_count * 100)
@@ -45,7 +46,7 @@ export function OverviewPage({ overview }: { overview: AffiliateOverview }) {
           <div className="referral-link">
             <span>{overview.referral_link}</span>
             <button type="button" className="button button-light" onClick={() => void copyLink()}>
-              {copied ? 'Copiado!' : 'Copiar link'}
+              {copied ? <><Icon name="check" size={15} /> Copiado!</> : <><Icon name="copy" size={15} /> Copiar link</>}
             </button>
           </div>
         </div>
@@ -54,7 +55,7 @@ export function OverviewPage({ overview }: { overview: AffiliateOverview }) {
           <div className="art-ring ring-two" />
           <span className="art-spark spark-one">✦</span>
           <span className="art-spark spark-two">✧</span>
-          <span className="art-mark">PS</span>
+          <span className="art-mark"><img alt="" src="/brand/rewards-mark.png" /></span>
         </div>
       </article>
 
@@ -69,7 +70,7 @@ export function OverviewPage({ overview }: { overview: AffiliateOverview }) {
       <div className="metric-grid">
         {metrics.map((metric) => (
           <article className="metric-card" key={metric.label}>
-            <div className={`metric-icon ${metric.tone}`} aria-hidden="true">{metric.icon}</div>
+            <div className={`metric-icon ${metric.tone}`} aria-hidden="true"><Icon name={metric.icon} size={17} /></div>
             <span className="metric-label">{metric.label}</span>
             <strong>{metric.value}</strong>
           </article>
@@ -79,7 +80,7 @@ export function OverviewPage({ overview }: { overview: AffiliateOverview }) {
       <div className="info-grid">
         <article className="info-card">
           <div className="info-card-heading">
-            <span className="info-icon">◎</span>
+            <span className="info-icon"><Icon name="users" size={17} /></span>
             <div><h3>Indicações</h3><p>O impacto das suas partilhas</p></div>
           </div>
           <div className="referral-count">
@@ -91,7 +92,7 @@ export function OverviewPage({ overview }: { overview: AffiliateOverview }) {
 
         <article className="info-card earning-card">
           <div className="info-card-heading">
-            <span className="info-icon">◷</span>
+            <span className="info-icon"><Icon name="clock" size={17} /></span>
             <div><h3>Próxima disponibilidade</h3><p>Sobre comissões em retenção</p></div>
           </div>
           <strong className="earning-value">{formatMoney(overview.pending_cents, overview.currency)}</strong>

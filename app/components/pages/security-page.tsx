@@ -1,4 +1,5 @@
 import type { TwoFactorStatus } from '../../lib/types';
+import { Icon } from '../icons';
 
 export function SecurityPage({ status, onSetup, onDisable }: { status: TwoFactorStatus | null; onSetup: () => void; onDisable: () => void }) {
   const stateLabel = status?.enabled ? 'ACTIVA' : status?.required ? 'NECESSÁRIA' : 'OPCIONAL';
@@ -21,7 +22,7 @@ export function SecurityPage({ status, onSetup, onDisable }: { status: TwoFactor
 
       <article className="security-card">
         <div className="security-illustration">
-          <span className="security-shield">✓</span>
+          <span className="security-shield"><Icon name="shield" size={38} /></span>
           <span className="shield-orbit orbit-a" />
           <span className="shield-orbit orbit-b" />
         </div>
@@ -30,7 +31,7 @@ export function SecurityPage({ status, onSetup, onDisable }: { status: TwoFactor
           <h2>Autenticação de dois factores</h2>
           <p>{description}</p>
           <div className="security-delivery">
-            <span className="delivery-icon">✉</span>
+            <span className="delivery-icon"><Icon name="mail" size={16} /></span>
             <span>O código será enviado para o seu e-mail verificado ou por SMS.</span>
           </div>
           {status?.enabled
@@ -40,8 +41,8 @@ export function SecurityPage({ status, onSetup, onDisable }: { status: TwoFactor
       </article>
 
       <div className="security-footnote">
-        <span>i</span>
-        <p>Nunca partilhe os seus códigos de segurança com terceiros. A equipa PS-Mobile nunca lhe pedirá um código de autenticação.</p>
+        <span><Icon name="info" size={13} /></span>
+        <p>Nunca partilhe os seus códigos de segurança com terceiros. A equipa Nobug Rewards nunca lhe pedirá um código de autenticação.</p>
       </div>
     </section>
   );

@@ -1,5 +1,6 @@
 import type { Commission } from '../../lib/types';
 import { formatDate, formatMoney, formatStatus } from '../../lib/format';
+import { Icon } from '../icons';
 
 export function CommissionsPage({ commissions }: { commissions: Commission[] }) {
   const total = commissions.reduce((sum, item) => sum + item.commission_cents, 0);
@@ -45,7 +46,7 @@ export function CommissionsPage({ commissions }: { commissions: Commission[] }) 
           </div>
         ) : (
           <div className="empty-state">
-            <span className="empty-icon">↗</span>
+            <span className="empty-icon"><Icon name="trend" size={19} /></span>
             <strong>Ainda sem comissões</strong>
             <p>Quando as suas indicações gerarem comissões, verá os detalhes aqui.</p>
           </div>

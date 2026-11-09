@@ -3,6 +3,8 @@
 import { FormEvent, useState } from 'react';
 import type { Challenge } from '../lib/types';
 import { BrandAttribution } from './brand-attribution';
+import { Icon, type IconName } from './icons';
+import { SocialLogin } from './social-login';
 
 export type AuthMode = 'login' | 'register' | 'verify';
 export type Credentials = { name: string; email: string; password: string; token: string };
@@ -15,10 +17,17 @@ type AuthScreenProps = {
   message: string;
   onModeChange: (mode: AuthMode) => void;
   onAuthenticate: (mode: AuthMode, credentials: Credentials) => void;
+  onSocialAuthenticate: (provider: 'google' | 'facebook', token: string) => void;
   onResendVerification: (email: string) => void;
   onVerifyChallenge: (code: string) => void;
   onCancelChallenge: () => void;
 };
+
+const benefits: Array<{ icon: IconName; title: string; description: string }> = [
+  { icon: 'gift', title: 'Recompensas que se acumulam', description: 'Cada indicação convertida soma comissões para a sua conta.' },
+  { icon: 'wallet', title: 'Levantamentos descomplicados', description: 'Receba por Multicaixa Express, Unitel Money ou transferência.' },
+  { icon: 'trend', title: 'Progresso sempre visível', description: 'Acompanhe indicações, ganhos e retenções em tempo real.' },
+];
 
 export function AuthScreen({
   mode,
@@ -28,6 +37,7 @@ export function AuthScreen({
   message,
   onModeChange,
   onAuthenticate,
+  onSocialAuthenticate,
   onResendVerification,
   onVerifyChallenge,
   onCancelChallenge,
@@ -37,6 +47,7 @@ export function AuthScreen({
   const [password, setPassword] = useState('');
   const [token, setToken] = useState('');
   const [code, setCode] = useState('');
+  const [socialError, setSocialError] = useState('');
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -71,25 +82,36 @@ export function AuthScreen({
 
   return (
     <main className="auth-page">
-      <aside className="auth-brand" aria-label="PS Affiliates">
-        <a className="brand-lockup" href="/" aria-label="PS Affiliates, início">
-          <img alt="" className="brand-mark brand-mark-image" decoding="async" src="/brand/affiliates.webp" />
-          <span>Affiliates</span>
+      <aside className="auth-brand" aria-label="Nobug Rewards">
+        <a className="brand-lockup" href="/" aria-label="Nobug Rewards, início">
+          <img alt="" className="brand-mark" decoding="async" src="/brand/rewards-mark.png" />
+          <span className="brand-wordmark">Nobug <b>Rewards</b></span>
         </a>
         <div className="auth-brand-copy">
-          <span className="eyebrow">CRESÇA CONNOSCO</span>
-          <h1>Transforme as suas recomendações em resultados.</h1>
+          <span className="eyebrow">RECOMPENSAS E ECOSSISTEMA DE PARCEIROS</span>
+          <h1>Transforme as suas recomendações em recompensas.</h1>
           <p>Partilhe o seu link, acompanhe as comissões e faça a gestão dos seus levantamentos num só lugar.</p>
+          <ul className="auth-benefits">
+            {benefits.map((benefit) => (
+              <li key={benefit.title}>
+                <span className="auth-benefit-icon"><Icon name={benefit.icon} size={17} /></span>
+                <span>
+                  <strong>{benefit.title}</strong>
+                  <small>{benefit.description}</small>
+                </span>
+              </li>
+            ))}
+          </ul>
         </div>
         <div className="auth-brand-foot">
-          <span className="brand-dot" /> Programa oficial de parceiros PS-Mobile
+          <span className="brand-dot" /> A sua plataforma de parceiros
         </div>
       </aside>
 
       <section className="auth-main">
         <div className="auth-card">
           <div className="auth-heading">
-            <img alt="" className="mobile-brand-mark brand-mark-image" decoding="async" src="/brand/affiliates.webp" />
+            <img alt="Nobug Rewards" className="mobile-brand-mark" decoding="async" src="/brand/rewards-mark.png" />
             <span className="eyebrow">{eyebrow}</span>
             <h2>{title}</h2>
             <p>{description}</p>
@@ -172,9 +194,20 @@ export function AuthScreen({
             )}
           </form>
 
+          {!challenge && mode === 'login' && (
+            <SocialLogin
+              disabled={busy}
+              onError={setSocialError}
+              onFacebookToken={(value) => onSocialAuthenticate('facebook', value)}
+              onGoogleToken={(value) => onSocialAuthenticate('google', value)}
+            />
+          )}
+
           {error && <p className="notice notice-error" role="alert">{error}</p>}
+          {socialError && <p className="notice notice-error" role="alert">{socialError}</p>}
           {message && <p className="notice notice-success" role="status">{message}</p>}
-          <p className="auth-privacy">Ao continuar, concorda com os termos e a política de privacidade da PS-Mobile.</p>
+          <div className="auth-trust"><Icon name="shield" size={14} /><span>Ambiente seguro e dados protegidos</span></div>
+          <p className="auth-privacy">Ao continuar, concorda com os termos e a política de privacidade da Nobug Rewards.</p>
           <BrandAttribution />
         </div>
       </section>

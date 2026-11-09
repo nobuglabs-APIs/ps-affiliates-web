@@ -9,9 +9,9 @@ import { clearTokens, hasTokens, readRefreshToken, saveTokens } from './lib/sess
 import { formatMoney } from './lib/format';
 import type { AffiliateOverview, AuthResponse, Challenge, Commission, Payout, Page, TwoFactorStatus } from './lib/types';
 
-const AdminPayoutsPage = lazy(() => import('./components/pages/admin-payouts-page').then((module) => ({ default: module.AdminPayoutsPage })));
 const AccountPage = lazy(() => import('./components/pages/account-page').then((module) => ({ default: module.AccountPage })));
 const CommissionsPage = lazy(() => import('./components/pages/commissions-page').then((module) => ({ default: module.CommissionsPage })));
+const NotificationsPage = lazy(() => import('./components/pages/notifications-page').then((module) => ({ default: module.NotificationsPage })));
 const OverviewPage = lazy(() => import('./components/pages/overview-page').then((module) => ({ default: module.OverviewPage })));
 const PayoutsPage = lazy(() => import('./components/pages/payouts-page').then((module) => ({ default: module.PayoutsPage })));
 const SecurityPage = lazy(() => import('./components/pages/security-page').then((module) => ({ default: module.SecurityPage })));
@@ -20,7 +20,6 @@ export default function AffiliatesPage() {
   const [overview, setOverview] = useState<AffiliateOverview | null>(null);
   const [commissions, setCommissions] = useState<Commission[]>([]);
   const [payouts, setPayouts] = useState<Payout[]>([]);
-  const [adminPayouts, setAdminPayouts] = useState<Payout[]>([]);
   const [twoFactor, setTwoFactor] = useState<TwoFactorStatus | null>(null);
   const [authMode, setAuthMode] = useState<AuthMode>('login');
   const [challenge, setChallenge] = useState<Challenge | null>(null);
@@ -40,7 +39,6 @@ export default function AffiliatesPage() {
     setLoadedViews({});
     setCommissions([]);
     setPayouts([]);
-    setAdminPayouts([]);
     setTwoFactor(null);
   }, []);
 
@@ -61,12 +59,6 @@ export default function AffiliatesPage() {
         } else if (view === 'security') {
           const status = await get<TwoFactorStatus>('/auth/me/two-factor');
           if (active) setTwoFactor(status);
-        } else if (view === 'admin' && overview.profile.is_admin) {
-          const [requested, processing] = await Promise.all([
-            get<Page<Payout>>('/admin/payouts?status=requested&per_page=50'),
-            get<Page<Payout>>('/admin/payouts?status=processing&per_page=50'),
-          ]);
-          if (active) setAdminPayouts([...requested.items, ...processing.items]);
         }
         if (active) setLoadedViews((current) => ({ ...current, [view]: true }));
       } catch (reason) {
@@ -170,6 +162,24 @@ export default function AffiliatesPage() {
     setAuthenticated(true);
   });
 
+  const authenticateSocial = (provider: 'google' | 'facebook', token: string) => run(async () => {
+    const body = provider === 'google' ? { id_token: token } : { access_token: token };
+    const result = await post<AuthResponse | { tokens: AuthResponse['tokens']; affiliate_id: string; is_new_user: boolean } | Challenge>(
+      `/auth/${provider}`,
+      body,
+      false,
+    );
+    if ('challenge_id' in result) {
+      setChallenge(result);
+      setChallengePurpose('login');
+      setMessage(`Código enviado por ${result.channel === 'email' ? 'e-mail' : 'SMS'}.`);
+      return;
+    }
+    saveTokens(result.tokens);
+    await loadData();
+    setAuthenticated(true);
+  });
+
   const resendVerification = (email: string) => run(async () => {
     await post('/auth/email/resend', { email }, false);
     setMessage('Se a conta ainda precisar de verificação, será enviado um novo e-mail.');
@@ -235,26 +245,6 @@ export default function AffiliatesPage() {
     setMessage(`Código enviado por ${next.channel === 'email' ? 'e-mail' : 'SMS'} para confirmar a desativação.`);
   });
 
-  const updatePayout = (payout: Payout, action: 'approve' | 'paid' | 'reject', details?: { providerRef?: string; note?: string }) => run(async () => {
-    if (action === 'approve') {
-      await post(`/admin/payouts/${payout.id}/approve`);
-    } else if (action === 'paid') {
-      await post(`/admin/payouts/${payout.id}/mark-paid`, {
-        provider_ref: details?.providerRef || null,
-        note: details?.note || null,
-      });
-    } else {
-      await post(`/admin/payouts/${payout.id}/reject`, { reason: details?.note || null });
-    }
-    const [requested, processing] = await Promise.all([
-      get<Page<Payout>>('/admin/payouts?status=requested&per_page=50'),
-      get<Page<Payout>>('/admin/payouts?status=processing&per_page=50'),
-    ]);
-    setAdminPayouts([...requested.items, ...processing.items]);
-    setLoadedViews((current) => ({ ...current, admin: true }));
-    setMessage(action === 'approve' ? 'Levantamento aprovado e enviado para processamento.' : action === 'paid' ? 'Levantamento marcado como pago.' : 'Levantamento rejeitado.');
-  });
-
   const signOut = () => run(async () => {
     const refreshToken = readRefreshToken();
     try {
@@ -281,6 +271,7 @@ export default function AffiliatesPage() {
         message={message}
         onModeChange={setAuthMode}
         onAuthenticate={authenticate}
+        onSocialAuthenticate={authenticateSocial}
         onResendVerification={resendVerification}
         onVerifyChallenge={verifyChallenge}
         onCancelChallenge={() => setChallenge(null)}
@@ -293,7 +284,6 @@ export default function AffiliatesPage() {
       userName={overview?.profile.full_name ?? ''}
       userAvatarUrl={overview?.profile.avatar_url ?? null}
       activeView={view}
-      isAdmin={Boolean(overview?.profile.is_admin)}
       busy={busy}
       error={error}
       message={message}
@@ -308,9 +298,7 @@ export default function AffiliatesPage() {
       {view === 'payouts' && loadedViews.payouts && overview && <PayoutsPage overview={overview} payouts={payouts} busy={busy} onRequestPayout={requestPayout} />}
       {view === 'account' && overview && <AccountPage overview={overview} onUpdated={setOverview} />}
       {view === 'security' && loadedViews.security && <SecurityPage status={twoFactor} onSetup={() => void startTwoFactorSetup()} onDisable={() => void startTwoFactorDisable()} />}
-      {view === 'admin' && loadedViews.admin && overview?.profile.is_admin && (
-        <AdminPayoutsPage payouts={adminPayouts} busy={busy} onUpdate={updatePayout} />
-      )}
+      {view === 'notifications' && loadedViews.notifications && <NotificationsPage />}
       </Suspense>
     </DashboardShell>
   );

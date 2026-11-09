@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from 'react';
 import type { AffiliateOverview } from '../../lib/types';
 import { mediaUrl, remove, request, upload } from '../../lib/api';
+import { Icon } from '../icons';
 
 type Preferences = {
   notify_email: boolean;
@@ -112,7 +113,7 @@ export function AccountPage({
       {message && <p className="notice notice-success" role="status">{message}</p>}
 
       <article className="account-panel">
-        <div className="account-panel-heading"><span className="account-panel-icon">◉</span><div><h2>Perfil</h2><p>Os dados de contacto associados à sua conta.</p></div></div>
+        <div className="account-panel-heading"><span className="account-panel-icon"><Icon name="user" size={18} /></span><div><h2>Perfil</h2><p>Os dados de contacto associados à sua conta.</p></div></div>
         <div className="affiliate-profile-image">
           <span className="affiliate-profile-avatar">
             {overview.profile.avatar_url
@@ -134,7 +135,7 @@ export function AccountPage({
       </article>
 
       <article className="account-panel">
-        <div className="account-panel-heading"><span className="account-panel-icon account-panel-icon--green">✓</span><div><h2>Notificações</h2><p>Escolha os canais onde quer receber novidades e avisos.</p></div></div>
+        <div className="account-panel-heading"><span className="account-panel-icon"><Icon name="bell" size={18} /></span><div><h2>Notificações</h2><p>Escolha os canais onde quer receber novidades e avisos.</p></div></div>
         <div className="affiliate-preferences">
           {([
             ['notify_email', 'E-mail'],
@@ -150,7 +151,7 @@ export function AccountPage({
       </article>
 
       <article className="account-panel">
-        <div className="account-panel-heading"><span className="account-panel-icon account-panel-icon--blue">⌑</span><div><h2>Alterar palavra-passe</h2><p>Recomendamos pelo menos 10 caracteres.</p></div></div>
+        <div className="account-panel-heading"><span className="account-panel-icon"><Icon name="shield" size={18} /></span><div><h2>Alterar palavra-passe</h2><p>Recomendamos pelo menos 10 caracteres.</p></div></div>
         <form className="account-form" onSubmit={savePassword}>
           <label><span>Palavra-passe atual</span><input autoComplete="current-password" required type="password" value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} /></label>
           <label><span>Nova palavra-passe</span><input autoComplete="new-password" minLength={10} required type="password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} /></label>
